@@ -4,31 +4,46 @@ from dotenv import load_dotenv
 import os
 from io import BytesIO
 import time
+from openai import AzureOpenAI
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
 # Azure OpenAI の設定
-AZURE_ENDPOINT = "https://aoai-aust-ab.openai.azure.com/openai/deployments/dalle-3/images/generations?api-version=2024-02-01"
-AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+AZURE_CHAT_ENDPOINT = os.getenv("AZURE_CHAT_ENDPOINT")
+AZURE_DALLE_ENDPOINT = os.getenv("AZURE_DALLE_ENDPOINT")
+AZURE_API_KEY = os.getenv("OPENAI_API_KEY")
+DALLE_API_KEY = os.getenv("DALLE_API_KEY")
 if not AZURE_API_KEY:
     st.error("AZURE_API_KEY が設定されていません。.envファイルを確認してください。")
     st.stop()
 
+chat_client = AzureOpenAI(
+    api_key = AZURE_API_KEY,
+    api_version = "2024-02-01",
+    azure_endpoint = AZURE_CHAT_ENDPOINT
+)
+
+# dalle_client = AzureOpenAI(
+#     api_key = DALLE_API_KEY,
+#     api_version = "2024-02-01",
+#     azure_endpoint = AZURE_CHAT_ENDPOINT
+# )
 # OpenAI API の設定（テキスト生成用）
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    st.error("OPENAI_API_KEY が設定されていません。.envファイルを確認してください。")
-    st.stop()
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# if not OPENAI_API_KEY:
+#     st.error("OPENAI_API_KEY が設定されていません。.envファイルを確認してください。")
+#     st.stop()
 
-import openai
+# import openai
 
-openai.api_key = OPENAI_API_KEY
+# openai.api_key = OPENAI_API_KEY
 
 
 def create_image_prompt(
     design_concept, container_type, container_size, additional_instructions
 ):
+    
     prompt = f"""
     ビール{container_type}のパッケージデザイン。
     サイズ: {container_size}
@@ -43,14 +58,16 @@ def create_image_prompt(
 def generate_image_with_dalle(prompt):
     headers = {
         "Content-Type": "application/json",
-        "api-key": AZURE_API_KEY,
+        "api-key": DALLE_API_KEY,
     }
     payload = {
         "prompt": prompt,
         "n": 1,
         "size": "1024x1024",
     }
-    response = requests.post(AZURE_ENDPOINT, headers=headers, json=payload)
+
+    
+    response = requests.post(AZURE_DALLE_ENDPOINT, headers=headers, json=payload)
     if response.status_code == 200:
         return response.json()["data"][0]["url"]
     elif response.status_code == 429:
@@ -67,9 +84,10 @@ def generate_image_with_dalle(prompt):
 def get_design_suggestion(
     design_concept, container_type, container_size, additional_instructions
 ):
+    
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = chat_client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
@@ -87,7 +105,7 @@ def get_design_suggestion(
                 },
             ],
         )
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content
     except Exception as e:
         st.error(f"デザイン案生成中にエラーが発生しました: {str(e)}")
         return None

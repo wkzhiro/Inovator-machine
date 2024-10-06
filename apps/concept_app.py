@@ -2,30 +2,43 @@ import streamlit as st
 import requests
 import os
 from dotenv import load_dotenv
+from openai import AzureOpenAI
 
 # .env ファイルから環境変数を読み込む
 load_dotenv()
 
 # Azure OpenAI の設定
-AZURE_ENDPOINT = "https://aoai-japaneast-ab.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview"
+AZURE_CHAT_ENDPOINT = "https://aoai-japaneast-ab.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview"
 AZURE_API_KEY = os.getenv("AZURE_API_KEY", "9fe06b4aeecc43de9492752b8c2fa90f")
 AZURE_MODEL = "gpt-4o"
 
+print(AZURE_API_KEY)
+
+chat_client = AzureOpenAI(
+    api_key = "9fe06b4aeecc43de9492752b8c2fa90f",
+    api_version = "2024-02-01",
+    azure_endpoint = AZURE_CHAT_ENDPOINT
+)
 
 def generate_azure_openai_response(messages):
-    headers = {
-        "Content-Type": "application/json",
-        "api-key": AZURE_API_KEY,
-    }
-    payload = {
-        "messages": messages,
-        "model": AZURE_MODEL,
-    }
-    response = requests.post(AZURE_ENDPOINT, headers=headers, json=payload)
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        raise Exception(f"Error: {response.status_code}, {response.text}")
+    try:
+        response = chat_client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages
+            )
+        # headers = {
+        #     "Content-Type": "application/json",
+        #     "api-key": AZURE_API_KEY,
+        # }
+        # payload = {
+        #     "messages": messages,
+        #     "model": AZURE_MODEL,
+        # }
+        # response = requests.post(AZURE_ENDPOINT, headers=headers, json=payload)
+    
+        return response.choices[0].message.content
+    except:
+        raise Exception(f"Errorが起きました。")
 
 
 def generate_feedback(concept, tone, perspective, additional_instructions=""):
