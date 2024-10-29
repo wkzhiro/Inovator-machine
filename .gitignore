@@ -13,8 +13,3 @@ venv/
 
 # ログ
 *.log
-
-# 特定のファイルを無視
-apps/BeerStorm_app.py
-apps/design_app.py
-apps/concept_app.py
