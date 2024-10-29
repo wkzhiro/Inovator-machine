@@ -1,0 +1,20 @@
+echo "# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+
+# 環境設定
+.env
+*.json
+
+# ログ
+*.log
+
+# 特定のファイルを無視
+apps/BeerStorm_app.py
+apps/design_app.py
+apps/concept_app.py
