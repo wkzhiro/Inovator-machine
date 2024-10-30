@@ -1940,11 +1940,32 @@ def main():
         load_dotenv()
         logger.info("環境変数を読み込みました。")
 
+        # ベースディレクトリの取得（このファイルの親の親ディレクトリ）
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+        # クレデンシャルパスの解決
+        google_credentials_path = os.getenv("GOOGLE_CREDENTIALS_PATH")
+        credentials_filename = os.path.basename(google_credentials_path)
+        absolute_credentials_path = os.path.join(base_dir, credentials_filename)
+
+        logger.info(f"Base directory: {base_dir}")
+        logger.info(f"Looking for credentials file: {credentials_filename}")
+        logger.info(f"Absolute credentials path: {absolute_credentials_path}")
+
+        if not os.path.exists(absolute_credentials_path):
+            raise FileNotFoundError(
+                f"Google credentials file not found at: {absolute_credentials_path}"
+            )
+
+        # 環境変数を絶対パスで更新
+        os.environ["GOOGLE_CREDENTIALS_PATH"] = absolute_credentials_path
+        logger.info(f"Using credentials at: {absolute_credentials_path}")
+
         # セッション状態の初期化
         init_session_state()
         logger.info("セッション状態を初期化しました。")
 
-        # 設定の初期化
+        # API設定の初期化
         api_config = APIConfig.from_env()
         logger.info("API設定を読み込みました。")
 
@@ -1958,25 +1979,25 @@ def main():
         logger.info("ページをセットアップしました。")
 
         # サイドバーのメニュー表示と選択内容を取得
-        menu = ui_manager.render_sidebar()
-        logger.info(f"選択されたメニュー: {menu}")
+        selected_menu = ui_manager.render_sidebar()
+        logger.info(f"選択されたメニュー: {selected_menu}")
 
         # 選択されたメニューに応じて画面を表示
-        if menu == "ホーム":
+        if selected_menu == "ホーム":
             ui_manager.render_home()
             logger.info("ホーム画面を表示しました。")
-        elif menu == "アイディア生成":
+        elif selected_menu == "アイディア生成":
             ui_manager.render_idea_generation()
             logger.info("アイディア生成画面を表示しました。")
-        elif menu == "セッション管理":
+        elif selected_menu == "セッション管理":
             ui_manager.render_session_management()
             logger.info("セッション管理画面を表示しました。")
-        elif menu == "設定":
+        elif selected_menu == "設定":
             ui_manager.render_settings()
             logger.info("設定画面を表示しました。")
         else:
             st.write("メニューの選択に誤りがあります。")
-            logger.warning("不明なメニューが選択されました。")
+            logger.warning(f"不明なメニューが選択されました: {selected_menu}")
 
     except Exception as e:
         logger.error(f"Application error: {str(e)}")
