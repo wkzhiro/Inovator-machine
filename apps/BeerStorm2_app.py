@@ -26,6 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+idea_size=int(os.getenv("IDEA_SIZE",100))
 
 class APIError(Exception):
     """API操作に関する基本的なエラー"""
@@ -102,16 +103,16 @@ class NeedscopeAttributes(TypedDict):
     keywords: List[str]
     description: str
     weight: float
-    category: str
+    # category: str
     emotional_value: str
-    target_demographic: str
-    consumption_occasion: str
+    # target_demographic: str
+    # consumption_occasion: str
 
 
 class NeedscopeType(Enum):
     """ニードスコープの種類を定義するクラス"""
 
-    TREND_SETTING = "刺激"
+    STIMULATION = "刺激"
     ADMIRATION = "権威"
     MASTERY = "洗練"
     UNWIND = "癒し"
@@ -176,8 +177,8 @@ class NeedscopeType(Enum):
 
 # NEEDSCOPEデータの定義
 NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
-    NeedscopeType.TREND_SETTING: {
-        "name": "刺激 (Trend-Setting)",
+    NeedscopeType.STIMULATION: {
+        "name": "刺激 (stimulation)",
         "color": "#ff0000",
         "keywords": [
             "刺激",
@@ -192,10 +193,10 @@ NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
         ],
         "description": "強く鋭い口当たり、炭酸が強く、アルコール度数が高いビールを求める",
         "weight": 1.0,
-        "category": "革新志向",
-        "emotional_value": "新しい体験への期待",
-        "target_demographic": "トレンドに敏感な若年層",
-        "consumption_occasion": "特別な機会やイベント",
+        # "category": "革新志向",
+        "emotional_value": "活力、新しい体験への期待",
+        # "target_demographic": "トレンドに敏感な若年層",
+        # "consumption_occasion": "特別な機会やイベント",
     },
     NeedscopeType.ADMIRATION: {
         "name": "権威 (Admiration)",
@@ -213,10 +214,10 @@ NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
         ],
         "description": "最高級の食材で作られた、濃厚で重くて風味豊かなビールを求める",
         "weight": 1.2,
-        "category": "プレステージ志向",
+        # "category": "プレステージ志向",
         "emotional_value": "優越感と満足感",
-        "target_demographic": "富裕層・経営者層",
-        "consumption_occasion": "高級レストラン・特別な祝い事",
+        # "target_demographic": "富裕層・経営者層",
+        # "consumption_occasion": "高級レストラン・特別な祝い事",
     },
     NeedscopeType.MASTERY: {
         "name": "洗練 (Mastery)",
@@ -234,10 +235,10 @@ NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
         ],
         "description": "伝統的な製法で作られた、深い味わいと香りのビールを求める",
         "weight": 1.1,
-        "category": "本物志向",
+        # "category": "本物志向",
         "emotional_value": "味わいの深さへの探求",
-        "target_demographic": "ビール通・愛好家",
-        "consumption_occasion": "じっくりと味わう時間",
+        # "target_demographic": "ビール通・愛好家",
+        # "consumption_occasion": "じっくりと味わう時間",
     },
     NeedscopeType.UNWIND: {
         "name": "癒し (Unwind)",
@@ -254,10 +255,10 @@ NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
         ],
         "description": "滑らかで飲みやすく、リラックスできるビールを求める",
         "weight": 0.9,
-        "category": "リラックス志向",
+        # "category": "リラックス志向",
         "emotional_value": "心身のリフレッシュ",
-        "target_demographic": "ストレス社会で生きる現代人",
-        "consumption_occasion": "リラックスタイム・休日",
+        # "target_demographic": "ストレス社会で生きる現代人",
+        # "consumption_occasion": "リラックスタイム・休日",
     },
     NeedscopeType.CONNECTION: {
         "name": "陽気 (Connection)",
@@ -274,10 +275,10 @@ NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
         ],
         "description": "仲間と楽しめる、軽快で飲みやすいビールを求める",
         "weight": 0.8,
-        "category": "コミュニケーション志向",
+        # "category": "コミュニケーション志向",
         "emotional_value": "共に楽しむ喜び",
-        "target_demographic": "社交的な若年～中年層",
-        "consumption_occasion": "パーティー・飲み会",
+        # "target_demographic": "社交的な若年～中年層",
+        # "consumption_occasion": "パーティー・飲み会",
     },
     NeedscopeType.RELEASE: {
         "name": "楽しさ (Release)",
@@ -294,10 +295,10 @@ NEEDSCOPE_DATA: Dict[NeedscopeType, NeedscopeAttributes] = {
         ],
         "description": "新しい体験や刺激を求める、ユニークなビールを求める",
         "weight": 0.95,
-        "category": "エンターテインメント志向",
+        # "category": "エンターテインメント志向",
         "emotional_value": "解放感と高揚感",
-        "target_demographic": "アクティブな若年層",
-        "consumption_occasion": "レジャー・アウトドア",
+        # "target_demographic": "アクティブな若年層",
+        # "consumption_occasion": "レジャー・アウトドア",
     },
 }
 
@@ -371,7 +372,7 @@ class APIConfig:
     def from_env(cls) -> "APIConfig":
         """環境変数から設定を読み込む"""
         required_vars = {
-            "AZURE_ENDPOINT": "Azure APIのエンドポイント",
+            "AZURE_CHAT_ENDPOINT": "Azure APIのエンドポイント",
             "AZURE_API_KEY": "Azure APIキー",
             "AZURE_DEPLOYMENT_NAME": "Azureデプロイメント名",
             "AZURE_API_VERSION": "Azure APIバージョン",
@@ -388,7 +389,7 @@ class APIConfig:
                 f"Missing environment variables: {', '.join(missing_vars)}"
             )
 
-        endpoint = os.getenv("AZURE_ENDPOINT", "")
+        endpoint = os.getenv("AZURE_CHAT_ENDPOINT", "")
         base_endpoint = endpoint.split("/openai/deployments")[0]
         google_creds_path = os.getenv("GOOGLE_CREDENTIALS_PATH")
 
@@ -414,7 +415,7 @@ class Session:
     session_id: str
     user_id: str
     start_time: datetime
-    end_time: Optional[datetime]
+    end_time: Optional[datetime.datetime]
     status: str
     total_ideas: int
     settings: Dict[str, Any]
@@ -468,13 +469,18 @@ class Persona:
     age: int
     gender: str
     occupation: str
-    expertise: str
-    experience: str
+    lifestyle: str
     thinking_style: str
     work_style: str
-    lifestyle: str
     drinking_habits: str
     beer_preferences: str
+    recent_concerns:str
+    family_composition:str
+    information_gathering_methods:str
+    health_consciousness:str
+    community:str
+    criteria_shopping_decisions:str
+    leisure_time_usage:str
 
     def to_dict(self) -> Dict[str, Any]:
         """ペルソナをディクショナリに変換"""
@@ -483,13 +489,20 @@ class Persona:
             "age": self.age,
             "gender": self.gender,
             "occupation": self.occupation,
-            "expertise": self.expertise,
-            "experience": self.experience,
+            # "expertise": self.expertise,
+            # "experience": self.experience,
             "thinking_style": self.thinking_style,
             "work_style": self.work_style,
             "lifestyle": self.lifestyle,
             "drinking_habits": self.drinking_habits,
             "beer_preferences": self.beer_preferences,
+            "recent_concerns":self.recent_concerns,
+            "family_composition":self.family_composition,
+            "information_gathering_methods":self.information_gathering_methods,
+            "health_consciousness":self.health_consciousness,
+            "community":self.community,
+            "criteria_shopping_decisions":self.criteria_shopping_decisions,
+            "leisure_time_usage":self.leisure_time_usage,
         }
 
 
@@ -502,8 +515,14 @@ class Idea:
     persona_id: str
     needscope_type: NeedscopeType
     concept_name: str
+    features: str
+    price: str
     description: str
     evaluation_score: float
+    tagline:str
+    accepted_consumer_belief:str
+    reason_to_believe:str
+
     created_at: datetime.datetime
 
     def to_dict(self) -> Dict[str, Any]:
@@ -515,6 +534,11 @@ class Idea:
             "needscope_type": self.needscope_type.value,
             "concept_name": self.concept_name,
             "description": self.description,
+            "features":self.features,
+            "price":self.price,
+            "tagline":self.tagline,
+            "accepted_consumer_belief":self.accepted_consumer_belief,
+            "reason_to_believe":self.reason_to_believe,
             "evaluation_score": self.evaluation_score,
             "created_at": self.created_at.isoformat(),
         }
@@ -546,42 +570,63 @@ class OpenAIClient(APIClient):
 
     def __init__(self, config: "APIConfig"):
         super().__init__(config)
+        self.client = None  # インスタンス変数として初期化
         self._setup_connection()
 
     def _setup_connection(self) -> None:
+        """API接続の設定を行うメソッド"""
+        self._setup_client()
+
+    def _setup_client(self) -> None:
         """OpenAI APIの設定"""
         try:
-            openai.api_type = "azure"
-            openai.api_base = self.config.azure_endpoint
-            openai.api_version = self.config.azure_api_version
-            openai.api_key = self.config.azure_api_key
+            self.client = openai.AzureOpenAI(
+                api_key=self.config.azure_api_key,
+                api_version=self.config.azure_api_version,
+                azure_endpoint=self.config.azure_endpoint
+            )
+            # openai.api_type = "azure"
+            # openai.api_base = self.config.azure_endpoint
+            # openai.api_version = self.config.azure_api_version
+            # openai.api_key = self.config.azure_api_key
             logger.info("OpenAI API configured successfully")
+            # print(f"OpenAI API Base URL: {openai.api_base}")
+
         except Exception as e:
             self._handle_api_error(e, "OpenAI setup")
 
     def generate_completion(self, messages: List[Dict[str, str]], **kwargs) -> str:
         """
-        ChatGPT APIを使用して応答を生成
+        ChatGPT APIを使用して応答を生成するメソッド
 
-        Args:
+        引数:
             messages (List[Dict[str, str]]): 会話メッセージのリスト
             **kwargs: その他のオプションパラメータ
 
-        Returns:
+        戻り値:
             str: 生成されたテキスト
 
-        Raises:
+        例外:
             APIError: API呼び出しに失敗した場合
         """
         try:
+            # レート制限をチェックし、必要であれば待機
             self.rate_limiter.wait_if_needed()
-            response = openai.ChatCompletion.create(
-                deployment_id=self.config.azure_model, messages=messages, **kwargs
+            # チャット応答の生成
+            response = self.client.chat.completions.create(
+                model=self.config.azure_model,
+                messages=messages,
+                response_format={"type": "json_object"},  # JSONフォーマットを指定
+                **kwargs
             )
-            return response.choices[0].message["content"].strip()
+            return response.choices[0].message.content.strip()
         except Exception as e:
-            self._handle_api_error(e, "chat completion")
+            self._handle_api_error(e, "チャット応答生成")
 
+@dataclass
+class WorksheetDataCacheEntry:
+    data: List[Dict[str, Any]]
+    last_fetched: float
 
 class GoogleSheetsClient(APIClient):
     def __init__(self, config: APIConfig):
@@ -589,6 +634,9 @@ class GoogleSheetsClient(APIClient):
         self.spreadsheet = self._setup_connection()
         self._worksheet_cache = {}
         self._ensure_worksheets_exist()
+        self._worksheet_data_cache: Dict[str, WorksheetDataCacheEntry] = {}
+        # キャッシュの有効期限（秒）
+        self.data_cache_expiry_seconds = 300  # 5分
 
     def _setup_connection(self) -> Any:
         try:
@@ -622,6 +670,11 @@ class GoogleSheetsClient(APIClient):
                 "needscope_type",
                 "concept_name",
                 "description",
+                "features",
+                "price",
+                "tagline",
+                "accepted_consumer_belief",
+                "reason_to_believe",
                 "evaluation_score",
                 "created_at",
             ],
@@ -633,7 +686,7 @@ class GoogleSheetsClient(APIClient):
             for worksheet_name, headers in required_worksheets.items():
                 if worksheet_name not in existing_worksheets:
                     worksheet = self.spreadsheet.add_worksheet(
-                        title=worksheet_name, rows="1000", cols=str(len(headers))
+                        title=worksheet_name, rows=idea_size, cols=str(len(headers))
                     )
                     worksheet.append_row(headers)
                     logger.info(f"Created worksheet: {worksheet_name}")
@@ -682,6 +735,9 @@ class GoogleSheetsClient(APIClient):
 
                 # Append row
                 worksheet.append_row(formatted_data)
+                # 行の追加が成功したら、該当ワークシートのデータキャッシュを無効化
+                if worksheet_name in self._worksheet_data_cache:
+                    del self._worksheet_data_cache[worksheet_name]
                 logger.info(
                     f"Successfully appended row to {worksheet_name}: {row_data}"
                 )
@@ -740,12 +796,22 @@ class GoogleSheetsClient(APIClient):
         self, worksheet_name: str, field_value: str, field_index: int
     ) -> List[Dict[str, Any]]:
         try:
-            worksheet = self._worksheet_cache[worksheet_name]
-            rows = worksheet.get_all_records()
+            now = time.time()
+            cache_entry = self._worksheet_data_cache.get(worksheet_name)
+
+            if cache_entry and now - cache_entry.last_fetched < self.data_cache_expiry_seconds:
+                rows = cache_entry.data
+            else:
+                worksheet, headers = self._get_worksheet(worksheet_name)
+                rows = worksheet.get_all_records()
+                self._worksheet_data_cache[worksheet_name] = WorksheetDataCacheEntry(
+                    data=rows, last_fetched=now
+                )
+
             matching_rows = [
                 row
                 for row in rows
-                if str(row.get(worksheet.row_values(1)[field_index])) == field_value
+                if str(row.get(headers[field_index])) == field_value
             ]
             logger.info(f"Filtered rows for {field_value}: {matching_rows}")
             return matching_rows
@@ -763,19 +829,26 @@ class GoogleSheetsClient(APIClient):
                 "age",
                 "gender",
                 "occupation",
-                "expertise",
-                "experience",
+                # "expertise",
+                # "experience",
                 "thinking_style",
                 "work_style",
                 "lifestyle",
                 "drinking_habits",
                 "beer_preferences",
+                "recent_concerns",
+                "family_composition",
+                "information_gathering_methods",
+                "health_consciousness",
+                "community",
+                "criteria_shopping_decisions",
+                "leisure_time_usage"
             ]
 
             # シートが存在しなければ作成
             if worksheet_name not in self._worksheet_cache:
                 worksheet = self.spreadsheet.add_worksheet(
-                    title=worksheet_name, rows="1000", cols=str(len(headers))
+                    title=worksheet_name, rows=idea_size, cols=str(len(headers))
                 )
                 worksheet.append_row(headers)
                 self._worksheet_cache[worksheet_name] = worksheet
@@ -789,13 +862,20 @@ class GoogleSheetsClient(APIClient):
                     persona.age,
                     persona.gender,
                     persona.occupation,
-                    persona.expertise,
-                    persona.experience,
+                    # persona.expertise,
+                    # persona.experience,
                     persona.thinking_style,
                     persona.work_style,
                     persona.lifestyle,
                     persona.drinking_habits,
                     persona.beer_preferences,
+                    persona.recent_concerns,
+                    persona.family_composition,
+                    persona.information_gathering_methods,
+                    persona.health_consciousness,
+                    persona.community,
+                    persona.criteria_shopping_decisions,
+                    persona.leisure_time_usage
                 ]
                 worksheet.append_row(row_data)
             logger.info(f"{len(personas)}件のペルソナ情報を保存しました")
@@ -812,7 +892,7 @@ class GoogleSheetsClient(APIClient):
             # シートが存在しなければ作成
             if worksheet_name not in self._worksheet_cache:
                 worksheet = self.spreadsheet.add_worksheet(
-                    title=worksheet_name, rows="1000", cols=str(len(headers))
+                    title=worksheet_name, rows=idea_size, cols=str(len(headers))
                 )
                 worksheet.append_row(headers)
                 self._worksheet_cache[worksheet_name] = worksheet
@@ -1020,13 +1100,20 @@ class BeerStormSystem:
                     persona.age,
                     persona.gender,
                     persona.occupation,
-                    persona.expertise,
-                    persona.experience,
+                    # persona.expertise,
+                    # persona.experience,
                     persona.thinking_style,
                     persona.work_style,
                     persona.lifestyle,
                     persona.drinking_habits,
                     persona.beer_preferences,
+                    persona.recent_concerns,
+                    persona.family_composition,
+                    persona.information_gathering_methods,
+                    persona.health_consciousness,
+                    persona.community,
+                    persona.criteria_shopping_decisions,
+                    persona.leisure_time_usage
                 ]
                 self.append_row("personas", row_data)
             logger.info(
@@ -1155,26 +1242,31 @@ class AIManager:
         各項目には必ず具体的な説明と、その理由や背景を含めてください。"""
 
         user_prompt = """
-        以下の形式で、詳細なペルソナ情報を生成してください。職業はバラエティーに富んだものにしてください。
+        以下の形式で、詳細なペルソナ情報を生成してください。
         各項目の内容は、具体的なエピソードや状況を含み、箇条書きで記載してください：
-
-        [以下の形式を厳密に守ってください]
-        ペルソナ: [職種、役職] (年齢)
-        性別: [性別]
-        専門分野:
-        - [内容]
-        経験:
-        - [内容]
-        思考スタイル:
-        - [内容]
-        仕事の進め方:
-        - [内容]
-        ライフスタイル:
-        - [内容]
-        飲酒習慣:
-        - [内容]
-        ビールの好み:
-        - [内容]"""
+        職種は会社員から主婦まで20代以上の社会人としてください。
+        
+        [以下のjson形式を厳密に守ってください]
+        
+        {
+            "職種": "職種を記載",
+            "役職": "役職を記載",
+            "年齢": 年齢を数値で記載,
+            "性別": "性別を記載",
+            "思考スタイル": "内容を記載",
+            "仕事の進め方": "内容を記載",
+            "ライフスタイル": "内容を記載",
+            "飲酒習慣": "内容を記載",
+            "ビールの好み": "内容を記載",
+            "最近の関心事": "内容を記載",
+            "家族構成": "内容を記載",
+            "情報の収集方法": "内容を記載",
+            "健康の関心毎": "内容を記載",
+            "コミュニティ": "内容を記載",
+            "買い物時の判断基準": "内容を記載",
+            "余暇の時間の使い方": "内容を記載"
+        }
+        """
 
         for _ in range(count):
             try:
@@ -1184,7 +1276,8 @@ class AIManager:
                             {"role": "system", "content": system_prompt},
                             {"role": "user", "content": user_prompt},
                         ],
-                        temperature=0.7,
+                        temperature=1,
+
                     )
 
                     if isinstance(response, dict) and "choices" in response:
@@ -1214,121 +1307,173 @@ class AIManager:
     def _parse_persona_response(self, response: str) -> Optional[Persona]:
         """AIの応答からペルソナオブジェクトを解析"""
         try:
-            lines = response.strip().split("\n")
-            current_section = None
-            data = {
-                "age": None,
-                "gender": None,
-                "occupation": None,
-                "expertise": [],
-                "experience": [],
-                "thinking_style": [],
-                "work_style": [],
-                "lifestyle": [],
-                "drinking_habits": [],
-                "beer_preferences": [],
-            }
+            # JSON形式の応答をパース
+            data = json.loads(response)
 
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    continue
+            # 必須フィールドの存在チェック
+            required_fields = ["年齢", "性別", "職種", "役職", "思考スタイル", "仕事の進め方", 
+                            "ライフスタイル", "飲酒習慣", "ビールの好み", "最近の関心事",
+                            "家族構成", "情報の収集方法", "健康の関心毎", "コミュニティ", 
+                            "買い物時の判断基準", "余暇の時間の使い方"]
 
-                if ":" in line and not line.startswith("-"):
-                    header, value = line.split(":", 1)
-                    header = header.strip().lower()
+            if not all(field in data for field in required_fields):
+                logger.error("応答に必要なフィールドが欠けています")
+                return None
 
-                    if "ペルソナ" in header:
-                        match = re.search(r"(.*?)\s*\((\d+)歳\)", value)
-                        if match:
-                            data["occupation"] = match.group(1).strip()
-                            data["age"] = int(match.group(2))
-                    elif "性別" in header:
-                        data["gender"] = value.strip()
+            # Personaオブジェクトを生成し、各フィールドに対応するデータをマッピング
+            return Persona(
+                persona_id=str(uuid.uuid4()),
+                age=int(data["年齢"]),
+                gender=data["性別"],
+                occupation=f"{data['職種']}、{data['役職']}",
+                thinking_style=data["思考スタイル"],
+                work_style=data["仕事の進め方"],
+                lifestyle=data["ライフスタイル"],
+                drinking_habits=data["飲酒習慣"],
+                beer_preferences=data["ビールの好み"],
+                recent_concerns=data["最近の関心事"],
+                family_composition=data["家族構成"],
+                information_gathering_methods=data["情報の収集方法"],
+                health_consciousness=data["健康の関心毎"],
+                community=data["コミュニティ"],
+                criteria_shopping_decisions=data["買い物時の判断基準"],
+                leisure_time_usage=data["余暇の時間の使い方"]
+            )
 
-                    current_section = header
-
-                elif line.startswith("-") and current_section:
-                    content = line[1:].strip()
-                    if "専門分野" in current_section:
-                        data["expertise"].append(content)
-                    elif "経験" in current_section:
-                        data["experience"].append(content)
-                    elif "思考" in current_section:
-                        data["thinking_style"].append(content)
-                    elif "仕事" in current_section:
-                        data["work_style"].append(content)
-                    elif "ライフスタイル" in current_section:
-                        data["lifestyle"].append(content)
-                    elif "飲酒習慣" in current_section:
-                        data["drinking_habits"].append(content)
-                    elif "ビール" in current_section:
-                        data["beer_preferences"].append(content)
-
-            for key in [
-                "expertise",
-                "experience",
-                "thinking_style",
-                "work_style",
-                "lifestyle",
-                "drinking_habits",
-                "beer_preferences",
-            ]:
-                if data[key]:
-                    data[key] = "\n".join(f"- {item}" for item in data[key])
-
-            if all(
-                data[field] is not None for field in ["age", "gender", "occupation"]
-            ):
-                return Persona(
-                    persona_id=str(uuid.uuid4()),
-                    age=data["age"],
-                    gender=data["gender"],
-                    occupation=data["occupation"],
-                    expertise=data["expertise"],
-                    experience=data["experience"],
-                    thinking_style=data["thinking_style"],
-                    work_style=data["work_style"],
-                    lifestyle=data["lifestyle"],
-                    drinking_habits=data["drinking_habits"],
-                    beer_preferences=data["beer_preferences"],
-                )
-
+        except json.JSONDecodeError as e:
+            logger.error(f"JSONデコードエラー: {e}")
             return None
-
         except Exception as e:
             logger.error(f"ペルソナレスポンスのパースエラー: {e}")
             return None
+        # try:
+        #     # lines = response.strip().split("\n")
+        #     current_section = None
+        #     data = {
+        #         "age": None,
+        #         "gender": None,
+        #         "occupation": None,
+        #         # "expertise": [],
+        #         # "experience": [],
+        #         "thinking_style": None,
+        #         "work_style": None,
+        #         "lifestyle": None,
+        #         "drinking_habits": None,
+        #         "beer_preferences": None,
+        #         "recent_concerns":None,
+        #         "family_composition":None,
+        #         "information_gathering_methods":None,
+        #         "health_consciousness":None,
+        #         "community":None,
+        #         "criteria_shopping_decisions":None,
+        #         "leisure_time_usage":None
+        #     }
 
-    def _generate_random_personas(
-        self, count: int, general: bool = False
-    ) -> List[Persona]:
+        #     for line in lines:
+        #         line = line.strip()
+        #         if not line:
+        #             continue
+
+        #         if ":" in line and not line.startswith("-"):
+        #             header, value = line.split(":", 1)
+        #             header = header.strip().lower()
+
+        #             if "ペルソナ" in header:
+        #                 match = re.search(r"(.*?)\s*\((\d+)歳\)", value)
+        #                 if match:
+        #                     data["occupation"] = match.group(1).strip()
+        #                     data["age"] = int(match.group(2))
+        #             elif "性別" in header:
+        #                 data["gender"] = value.strip()
+
+        #             current_section = header
+
+        #         elif line.startswith("-") and current_section:
+        #             content = line[1:].strip()
+        #             # if "専門分野" in current_section:
+        #             #     data["expertise"].append(content)
+        #             # elif "経験" in current_section:
+        #             #     data["experience"].append(content)
+        #             if "思考" in current_section:
+        #                 data["thinking_style"].append(content)
+        #             elif "仕事" in current_section:
+        #                 data["work_style"].append(content)
+        #             elif "ライフスタイル" in current_section:
+        #                 data["lifestyle"].append(content)
+        #             elif "飲酒習慣" in current_section:
+        #                 data["drinking_habits"].append(content)
+        #             elif "ビール" in current_section:
+        #                 data["beer_preferences"].append(content)
+
+        #     for key in [
+        #         "expertise",
+        #         "experience",
+        #         "thinking_style",
+        #         "work_style",
+        #         "lifestyle",
+        #         "drinking_habits",
+        #         "beer_preferences",
+        #     ]:
+        #         if data[key]:
+        #             data[key] = "\n".join(f"- {item}" for item in data[key])
+
+        #     if all(
+        #         data[field] is not None for field in ["age", "gender", "occupation"]
+        #     ):
+        #         return Persona(
+        #             persona_id=str(uuid.uuid4()),
+        #             age=data["age"],
+        #             gender=data["gender"],
+        #             occupation=data["occupation"],
+        #             # expertise=data["expertise"],
+        #             # experience=data["experience"],
+        #             thinking_style=data["thinking_style"],
+        #             work_style=data["work_style"],
+        #             lifestyle=data["lifestyle"],
+        #             drinking_habits=data["drinking_habits"],
+        #             beer_preferences=data["beer_preferences"],
+        #         )
+
+        #     return None
+
+        # except Exception as e:
+        #     logger.error(f"ペルソナレスポンスのパースエラー: {e}")
+        #     return None
+
+    def _generate_random_personas(self, count: int, general: bool = False) -> List[Persona]:
         """フォールバックとしてランダムにペルソナを生成"""
         personas = []
         occupations = [
-            "商品開発マネージャー",
-            "マーケティング責任者",
-            "品質管理スペシャリスト",
-            "営業統括部長",
-            "消費者調査アナリスト",
+            {"職種": "商品開発", "役職": "商品開発マネージャー"},
+            {"職種": "マーケティング", "役職": "マーケティング責任者"},
+            {"職種": "品質管理", "役職": "品質管理スペシャリスト"},
+            {"職種": "営業", "役職": "営業統括部長"},
+            {"職種": "消費者調査", "役職": "消費者調査アナリスト"},
         ]
 
         for i in range(count):
+            occupation = occupations[i % len(occupations)]
             personas.append(
                 Persona(
                     persona_id=str(uuid.uuid4()),
+                    occupation=occupation["職種"],
+                    # job_title=occupation["役職"],
                     age=random.randint(30, 60),
                     gender=random.choice(["男性", "女性"]),
-                    occupation=occupations[i % len(occupations)],
-                    expertise="食品業界の専門知識",
-                    experience=f"{random.randint(5, 20)}年の経験",
                     thinking_style=random.choice(["クリエイティブ", "分析的"]),
                     work_style=random.choice(["チーム協調", "個人プレー"]),
                     lifestyle=random.choice(["アクティブ", "落ち着いた"]),
                     drinking_habits=random.choice(["週末に飲む", "日常的に飲む"]),
                     beer_preferences=random.choice(
-                        ["クラフトビール", "ライトビール", "ノンアルコールビール"]
+                        ["クラフトビール", "レギュラービール", "ノンアルコールビール"]
                     ),
+                    recent_concerns=random.choice(["健康", "仕事の効率","趣味","アイドル","ゲーム"]),
+                    family_composition=random.choice(["独身", "配偶者あり", "配偶者と子供"]),
+                    information_gathering_methods=random.choice(["SNS", "インターネット検索", "テレビ","新聞"]),
+                    health_consciousness=random.choice(["高い", "中程度", "低い"]),
+                    community=random.choice(["地域サークル", "職場コミュニティ", "オンラインフォーラム"]),
+                    criteria_shopping_decisions=random.choice(["品質", "価格", "ブランド"]),
+                    leisure_time_usage=random.choice(["アウトドア活動", "読書", "趣味活動"])
                 )
             )
         return personas
@@ -1409,67 +1554,164 @@ class AIManager:
     ) -> str:
         """アイデア生成用のプロンプトを作成"""
         needscope_info = NEEDSCOPE_DATA[needscope_type]
+        
         prompt = f"""
-以下のペルソナとニードスコープに基づいて、独創的なビールのコンセプトを生成してください。
+            以下のペルソナとニードスコープに基づいて、ビールのコンセプトを生成してください。
 
-[ペルソナ情報]
-- 年齢: {persona.age}歳
-- 職種: {persona.occupation}
-- 専門性: {persona.expertise}
-- 思考スタイル: {persona.thinking_style}
-- ビール好み: {persona.beer_preferences}
+            【背景】
+            ビール会社が新しい商品を企画しており、市場に価値をもたらす革新的な新商品・サービスのアイデアを発想したいと考えています。
+            
+            【コンセプトの方針】
+            {idea_prompt}
 
-[ニードスコープ]
-- タイプ: {needscope_info['name']}
-- キーワード: {', '.join(needscope_info['keywords'])}
-- 感情価値: {needscope_info['emotional_value']}
-- 消費機会: {needscope_info['consumption_occasion']}
+            【ターゲットペルソナ】
+            年齢: {persona.age}
+            性別: {persona.gender}
+            職業: {persona.occupation}
+            ライフスタイル: {persona.lifestyle}
+            飲酒習慣: {persona.drinking_habits}
+            ビール好み: {persona.beer_preferences}
+            最近の懸念: {persona.recent_concerns}
+            家族構成: {persona.family_composition}
+            情報収集方法: {persona.information_gathering_methods}
+            健康意識: {persona.health_consciousness}
+            コミュニティ: {persona.community}
+            購買決定基準: {persona.criteria_shopping_decisions}
+            余暇時間の使い方: {persona.leisure_time_usage}
 
-[追加の要望]
-{idea_prompt}
+            【ニードスコープ】
+            タイプ: {needscope_info['name']}
+            特徴: {needscope_info['description']}
+            キーワード: {', '.join(needscope_info['keywords'])}
+            得られる感情：{needscope_info['emotional_value']}
+            
+            ###jsonの形式
+            {{
+                "製品名":"商品の名前",
+                "コンセプト":"商品のコンセプト",
+                "特徴":"ビールのパッケージや中身の特徴",
+                "想定価格":"値段（例：100円）",
+                "タグライン":"ビールの説明",
+                "accepted_consumer_belief":"ユーザーの困りごと",
+                "reason_to_believe":"顧客にとってお困りを解決するに値する理由（主に中身やパッケージとったスペック）"
+            }}
 
-以下の形式で出力してください：
-商品名：[商品名]
-コンセプト：[150-250文字程度でコンセプトを説明]
-"""
+            【トーンとスタイル】
+            - イノベーティブで創造的な表現を心がける
+            - 論理的で説得力のある文章を心がける
+            - 明確かつ簡潔に伝える
+
+            ###条件（必ず守ること）
+            ・コンセプト:商品のコンセプトは100～140字程度で、価値やユーザー、ターゲット、商品特徴を含めてください。
+            ・タグラインは30文字程度
+            ・Accepted Consumer Beliefは40文字程度
+            ・reason to believeは100～120文字
+
+        """
+        # prompt = f"""
+        #     以下のペルソナとニードスコープに基づいて、独創的なビールのコンセプトを生成してください。
+
+        #     [ペルソナ情報]
+        #     - 年齢: {persona.age}歳
+        #     - 職種: {persona.occupation}
+        #     - ビール好み: {persona.beer_preferences}
+
+        #     [ニードスコープ]
+        #     - タイプ: {needscope_info['name']}
+        #     - キーワード: {', '.join(needscope_info['keywords'])}
+        #     - 感情価値: {needscope_info['emotional_value']}
+        #     - 消費機会: {needscope_info['consumption_occasion']}
+
+        #     [追加の要望]
+        #     {idea_prompt}
+
+        #     以下の形式で出力してください:
+        #     商品名：[商品名]
+        #     コンセプト：[150-250文字程度でコンセプトを説明]
+
+        # """
+
         return prompt
-
     def _parse_idea_response(
         self, response: str, persona: Persona, needscope_type: NeedscopeType
     ) -> Optional[Idea]:
-        """AIの応答をアイデアオブジェクトにパース"""
+        """AIのJSON応答をアイデアオブジェクトにパース"""
         try:
-            lines = response.strip().split("\n")
-            concept_name = ""
-            description = ""
+            # JSON形式の応答をパース
+            data = json.loads(response)
 
-            for line in lines:
-                if "商品名：" in line:
-                    concept_name = line.split("：", 1)[1].strip()
-                elif "コンセプト：" in line:
-                    description = line.split("：", 1)[1].strip()
+            # 必須フィールドの存在確認
+            required_fields = ["製品名", "コンセプト", "特徴", "想定価格", "タグライン", 
+                            "accepted_consumer_belief", "reason_to_believe"]
 
-            if concept_name and description:
-                # ニードスコープ分析を実行
-                needscope_analysis = analyze_text_for_needscope(description)
-                evaluation_score = sum(
-                    analysis.total_score for analysis in needscope_analysis
-                )
+            if not all(field in data for field in required_fields):
+                logger.error("応答に必要なフィールドが欠けています")
+                return None
 
-                return Idea(
-                    idea_id=str(uuid.uuid4()),
-                    session_id=st.session_state.current_session_id,
-                    persona_id=persona.persona_id,
-                    needscope_type=needscope_type,
-                    concept_name=concept_name,
-                    description=description,
-                    evaluation_score=evaluation_score,
-                    created_at=datetime.datetime.now(),
-                )
+            # ニードスコープ分析を実行
+            needscope_analysis = analyze_text_for_needscope(data["コンセプト"])
+            evaluation_score = sum(analysis.total_score for analysis in needscope_analysis)
 
+            # Ideaオブジェクトを生成
+            return Idea(
+                idea_id=str(uuid.uuid4()),
+                session_id=st.session_state.current_session_id,
+                persona_id=persona.persona_id,
+                needscope_type=needscope_type,
+                concept_name=data["製品名"],
+                description=data["コンセプト"],
+                features=data["特徴"],
+                price=data["想定価格"],
+                tagline=data["タグライン"],
+                accepted_consumer_belief=data["accepted_consumer_belief"],
+                reason_to_believe=data["reason_to_believe"],
+                evaluation_score=evaluation_score,
+                created_at=datetime.datetime.now(),
+            )
+
+        except json.JSONDecodeError as e:
+            logger.error(f"JSONデコードエラー: {e}")
+            return None
         except Exception as e:
             logger.error(f"アイデアレスポンスのパースエラー: {str(e)}")
             return None
+    
+    # def _parse_idea_response(
+    #     self, response: str, persona: Persona, needscope_type: NeedscopeType
+    # ) -> Optional[Idea]:
+    #     """AIの応答をアイデアオブジェクトにパース"""
+    #     try:
+    #         lines = response.strip().split("\n")
+    #         concept_name = ""
+    #         description = ""
+
+    #         for line in lines:
+    #             if "商品名：" in line:
+    #                 concept_name = line.split("：", 1)[1].strip()
+    #             elif "コンセプト：" in line:
+    #                 description = line.split("：", 1)[1].strip()
+
+    #         if concept_name and description:
+    #             # ニードスコープ分析を実行
+    #             needscope_analysis = analyze_text_for_needscope(description)
+    #             evaluation_score = sum(
+    #                 analysis.total_score for analysis in needscope_analysis
+    #             )
+
+    #             return Idea(
+    #                 idea_id=str(uuid.uuid4()),
+    #                 session_id=st.session_state.current_session_id,
+    #                 persona_id=persona.persona_id,
+    #                 needscope_type=needscope_type,
+    #                 concept_name=concept_name,
+    #                 description=description,
+    #                 evaluation_score=evaluation_score,
+    #                 created_at=datetime.datetime.now(),
+    #             )
+
+    #     except Exception as e:
+    #         logger.error(f"アイデアレスポンスのパースエラー: {str(e)}")
+    #         return None
 
 
 if TYPE_CHECKING:
@@ -1555,7 +1797,7 @@ class UIManager:
                         st.success(
                             f"新しいセッションが開始されました！\nセッションID: {session_id}"
                         )
-                        st.rerun()
+                        # st.rerun()
             else:
                 self._render_persona_editor()
 
@@ -1568,13 +1810,19 @@ class UIManager:
             for persona in st.session_state.personas:
                 with st.expander(f"ペルソナ: {persona.occupation} ({persona.age}歳)"):
                     st.write(f"性別: {persona.gender}")
-                    st.write(f"専門分野: {persona.expertise}")
-                    st.write(f"経験: {persona.experience}")
+                    # st.write(f"専門分野: {persona.expertise}")
+                    # st.write(f"経験: {persona.experience}")
                     st.write(f"思考スタイル: {persona.thinking_style}")
                     st.write(f"仕事の進め方: {persona.work_style}")
                     st.write(f"ライフスタイル: {persona.lifestyle}")
                     st.write(f"飲酒習慣: {persona.drinking_habits}")
                     st.write(f"ビールの好み: {persona.beer_preferences}")
+                    st.write(f"最近の懸念: {persona.recent_concerns}")
+                    st.write(f"家族構成: {persona.family_composition}")
+                    st.write(f"情報収集方法: {persona.information_gathering_methods}")
+                    st.write(f"健康意識: {persona.health_consciousness}")
+                    st.write(f"コミュニティ: {persona.community}")
+                    st.write(f"購買決定基準: {persona.criteria_shopping_decisions}")
 
             if st.button("ペルソナを確定", key="confirm_personas"):
                 st.session_state.personas_confirmed = True
@@ -1614,8 +1862,8 @@ class UIManager:
 
         # 進捗状況の表示
         total_ideas = len(st.session_state.generated_ideas)
-        st.progress(total_ideas / 1000)
-        st.markdown(f"**総生成数**: {total_ideas}/1000")
+        st.progress(total_ideas / idea_size)
+        st.markdown(f"**総生成数**: {total_ideas}/{idea_size}")
 
         # バッチ生成のコントロール
         if "is_generating" not in st.session_state:
@@ -1626,12 +1874,9 @@ class UIManager:
             button_text = (
                 "自動生成を停止" if st.session_state.is_generating else "自動生成を開始"
             )
-            if st.button(
-                button_text,
-                type="primary" if not st.session_state.is_generating else "secondary",
-            ):
+            if st.button(button_text):
                 st.session_state.is_generating = not st.session_state.is_generating
-                st.rerun()
+                # st.rerun()
 
         with col2:
             if st.button("一時保存", disabled=st.session_state.is_generating):
@@ -1639,7 +1884,7 @@ class UIManager:
                 st.success("現在のバッチを保存しました")
 
         # 自動生成モードの実行
-        if st.session_state.is_generating and total_ideas < 1000:
+        if st.session_state.is_generating and total_ideas < idea_size:
             current_batch = []
             progress_bar = st.progress(0)
             status_text = st.empty()
@@ -1647,7 +1892,7 @@ class UIManager:
             try:
                 # バッチサイズ分のアイデアを生成
                 for i in range(batch_size):
-                    if total_ideas + i >= 1000:
+                    if total_ideas + i >= idea_size:
                         break
 
                     # ランダムにニードスコープを選択（選択されていない場合）
@@ -1673,6 +1918,7 @@ class UIManager:
                         self._display_idea_card(idea)
                         st.session_state.generated_ideas.append(idea)
                         time.sleep(0.5)  # API制限を考慮
+                        print(idea)
 
                 # バッチ完了後に自動保存
                 if current_batch:
@@ -1687,8 +1933,8 @@ class UIManager:
                 st.session_state.is_generating = False
                 logger.error(f"バッチ生成エラー: {str(e)}")
 
-            if total_ideas >= 1000:
-                st.success("🎉 1000個のアイデア生成が完了しました！")
+            if total_ideas >= idea_size:
+                st.success(f"🎉 {idea_size}個のアイデア生成が完了しました！")
                 st.session_state.is_generating = False
 
     def _display_idea_card(self, idea: Idea):
@@ -1755,9 +2001,7 @@ class UIManager:
         try:
             for idea in batch:
                 # NeedscopeTypeをstrに変換
-                needscope_value = (
-                    idea.needscope_type.value if idea.needscope_type else ""
-                )
+                needscope_value = idea.needscope_type.value if idea.needscope_type else ""
 
                 # 日時をISO形式の文字列に変換
                 created_at_str = idea.created_at.isoformat() if idea.created_at else ""
@@ -1770,6 +2014,11 @@ class UIManager:
                     needscope_value,
                     str(idea.concept_name),
                     str(idea.description),
+                    str(idea.features),
+                    str(idea.price),
+                    str(idea.tagline),
+                    str(idea.accepted_consumer_belief),
+                    str(idea.reason_to_believe),
                     str(idea.evaluation_score),
                     created_at_str,
                 ]
@@ -1788,6 +2037,45 @@ class UIManager:
             logger.error(f"バッチ保存処理エラー: {str(e)}")
             st.error("データの保存中にエラーが発生しました。")
             raise
+
+    # def _save_batch_to_spreadsheet(self, batch: List[Idea]):
+    #     """バッチをスプレッドシートに保存"""
+    #     try:
+    #         for idea in batch:
+    #             # NeedscopeTypeをstrに変換
+    #             needscope_value = (
+    #                 idea.needscope_type.value if idea.needscope_type else ""
+    #             )
+
+    #             # 日時をISO形式の文字列に変換
+    #             created_at_str = idea.created_at.isoformat() if idea.created_at else ""
+
+    #             # 保存するデータの準備
+    #             row_data = [
+    #                 str(idea.idea_id),
+    #                 str(idea.session_id),
+    #                 str(idea.persona_id),
+    #                 needscope_value,
+    #                 str(idea.concept_name),
+    #                 str(idea.description),
+    #                 str(idea.evaluation_score),
+    #                 created_at_str,
+    #             ]
+
+    #             try:
+    #                 self.system.sheets_client.append_row("ideas", row_data)
+    #                 logger.info(f"アイデアを保存: {idea.concept_name}")
+    #                 time.sleep(0.5)  # APIレート制限を考慮
+    #             except Exception as e:
+    #                 logger.error(f"個別アイデアの保存エラー: {str(e)}")
+    #                 continue  # 1件の失敗で全体を止めない
+
+    #         logger.info(f"バッチ {len(batch)} 件の保存を完了")
+
+    #     except Exception as e:
+    #         logger.error(f"バッチ保存処理エラー: {str(e)}")
+    #         st.error("データの保存中にエラーが発生しました。")
+    #         raise
 
     def _render_user_registration(self):
         st.markdown("### 👤 ユーザー名を入力してください")
@@ -1933,9 +2221,14 @@ class UIManager:
         st.session_state.settings["dev_mode"] = dev_mode
 
 
-def main():
+def run():
     """メインアプリケーション"""
     try:
+    
+        # # ページ設定を最初に行う
+        # st.set_page_config(page_title="BeerStormApp", layout="wide")
+        # logger.info("ページをセットアップしました。")
+
         # 環境変数の読み込み
         load_dotenv()
         logger.info("環境変数を読み込みました。")
@@ -1974,10 +2267,6 @@ def main():
         ui_manager = UIManager(system)
         logger.info("システムとUIの初期化が完了しました。")
 
-        # UIの表示
-        ui_manager.setup_page()
-        logger.info("ページをセットアップしました。")
-
         # サイドバーのメニュー表示と選択内容を取得
         selected_menu = ui_manager.render_sidebar()
         logger.info(f"選択されたメニュー: {selected_menu}")
@@ -2003,6 +2292,5 @@ def main():
         logger.error(f"Application error: {str(e)}")
         st.error(f"アプリケーションエラーが発生しました: {str(e)}")
 
-
 if __name__ == "__main__":
-    main()
+    run()

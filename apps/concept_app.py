@@ -171,7 +171,7 @@ def run():
     )
 
     # --- 生成ボタン ---
-    if st.button("フィードバックと改善案を生成", type="primary"):
+    if st.button("フィードバックと改善案を生成"):
         if not concept_input.strip():
             st.warning("コンセプトを入力してください")
         elif not any(

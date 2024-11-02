@@ -1,5 +1,6 @@
 from . import concept_app
 from . import design_app
+from . import BeerStorm2_app
 
 # If you want to make the run functions directly accessible from the apps package,
 # you can uncomment the following lines:

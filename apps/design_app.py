@@ -12,7 +12,7 @@ load_dotenv()
 # Azure OpenAI の設定
 AZURE_CHAT_ENDPOINT = os.getenv("AZURE_CHAT_ENDPOINT")
 AZURE_DALLE_ENDPOINT = os.getenv("AZURE_DALLE_ENDPOINT")
-AZURE_API_KEY = os.getenv("OPENAI_API_KEY")
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 DALLE_API_KEY = os.getenv("DALLE_API_KEY")
 if not AZURE_API_KEY:
     st.error("AZURE_API_KEY が設定されていません。.envファイルを確認してください。")
@@ -142,7 +142,7 @@ def run():
         placeholder="例：金色のロゴを使用、和風の要素を取り入れる、など具体的な指示を入力してください",
     )
 
-    if st.button("デザインを生成", type="primary"):
+    if st.button("デザインを生成"):
         if not design_concept.strip():
             st.warning("デザインコンセプトを入力してください")
         else:
