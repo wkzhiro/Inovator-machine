@@ -640,8 +640,13 @@ class GoogleSheetsClient(APIClient):
 
     def _setup_connection(self) -> Any:
         try:
-            credentials = Credentials.from_service_account_file(
-                self.config.google_credentials_path,
+            credentials_info = os.getenv("GOOGLE_CREDENTIALS_JSON")
+            if not credentials_info:
+                raise ValueError("環境変数 'GOOGLE_CREDENTIALS_JSON' が設定されていません")
+
+            credentials = Credentials.from_service_account_info(
+                json.loads(credentials_info),
+                # self.config.google_credentials_path,
                 scopes=["https://www.googleapis.com/auth/spreadsheets"],
             )
             gc = gspread.authorize(credentials)
